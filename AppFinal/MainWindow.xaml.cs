@@ -1,10 +1,11 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.IO;
+﻿using System;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using static AppFinal.Personne;
 
 namespace AppFinal
 {
@@ -21,6 +22,7 @@ namespace AppFinal
             listViewForme.ItemsSource = listeVols;
             heuresAtterrissage = new StringBuilder();
             DeserializeData();
+            AfficherContenuFichier();
         }
 
         private void CbObjet_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -67,6 +69,8 @@ namespace AppFinal
 
                 listeVols.Add(vol);
                 Console.WriteLine($"{vol.Type} décollé : {vol.Nom}");
+                AfficherContenuFichier();
+                SerializeData();
             }
         }
 
@@ -100,19 +104,51 @@ namespace AppFinal
                 TextBlockHeureAtterrissage.Text = heuresAtterrissage.ToString();
             }
         }
+
         private void SerializeData()
         {
-            string jsonData = JsonConvert.SerializeObject(listeVols);
-            File.WriteAllText("data.json", jsonData);
+            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "data.dat");
+
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(fileStream, listeVols);
+            }
         }
 
         private void DeserializeData()
         {
-            if (File.Exists("data.json"))
+            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "data.dat");
+
+            if (File.Exists(filePath))
             {
-                string jsonData = File.ReadAllText("data.json");
-                listeVols = JsonConvert.DeserializeObject<ObservableCollection<Vol>>(jsonData);
+                using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    listeVols = (ObservableCollection<Vol>)formatter.Deserialize(fileStream);
+                }
+
                 listViewForme.ItemsSource = listeVols;
+            }
+        }
+
+        private void AfficherContenuFichier()
+        {
+            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "data.dat");
+            if (File.Exists(filePath))
+            {
+                byte[] buffer;
+                using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
+                {
+                    buffer = new byte[fileStream.Length];
+                    fileStream.Read(buffer, 0, buffer.Length);
+                }
+                string contenu = BitConverter.ToString(buffer).Replace("-", "");
+                TextBlockContenuFichier.Text = contenu;
+            }
+            else
+            {
+                TextBlockContenuFichier.Text = "Le fichier n'existe pas.";
             }
         }
 
@@ -121,9 +157,9 @@ namespace AppFinal
             SerializeData(); // Sérialiser les données avant de fermer l'application
             base.OnClosing(e);
         }
-
     }
 
+    [Serializable]
     public class Vol
     {
         public string Type { get; set; }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AppFinal"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="500" Width="840">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -36,6 +36,7 @@
                 <Button x:Name="btnDecollage" Click="BtnDecollage_OnClick" VerticalAlignment="Bottom" Margin="10,20,10,20">Décollage</Button>
             </StackPanel>
         </GroupBox>
+
         <GroupBox Grid.Column="1" FontSize="18" FontWeight="SemiBold" Header="En vol" Margin="20,10,20,20">
             <StackPanel>
                 <ListView x:Name="listViewForme" FontSize="14" FontWeight="Normal" SelectionChanged="ListViewForme_OnSelectionChanged" Margin="10,10,10,10">
@@ -52,9 +53,14 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
+
                 <Label x:Name="LabelFormInfos" FontSize="14" BorderBrush="#9A9696" BorderThickness="1" Margin="10,10,10,10" Content="Pas de vol en ce moment"/>
-                <TextBlock x:Name="TextBlockHeureAtterrissage" FontSize="14" Margin="10,10,10,10" Text="Heure d'atterrissage :"/>
-                
+                <TextBlock x:Name="TextBlockHeureAtterrissage" FontSize="14" Margin="10,10,10,10" Text="Heure d'atterrissage :" />
+                <GroupBox Header="Contenu du fichier" Height="101" Width="352">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" Width="332" Height="64">
+                        <TextBlock x:Name="TextBlockContenuFichier" TextWrapping="Wrap" FontSize="14" Margin="5" Height="49" />
+                    </ScrollViewer>
+                </GroupBox>
             </StackPanel>
         </GroupBox>
     </Grid>
