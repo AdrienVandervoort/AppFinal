@@ -1,28 +1,27 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using static AppFinal.Personne;
+using Newtonsoft.Json;
 
 namespace AppFinal
 {
     public partial class MainWindow : Window
     {
         private ObservableCollection<Vol> listeVols;
-        private StringBuilder heuresAtterrissage;
+        private ObservableCollection<string> heuresAtterrissage;
 
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = new ViewModel();
 
             listeVols = new ObservableCollection<Vol>();
             listViewForme.ItemsSource = listeVols;
-            heuresAtterrissage = new StringBuilder();
+            heuresAtterrissage = new ObservableCollection<string>();
             DeserializeData();
-            AfficherContenuFichier();
         }
 
         private void CbObjet_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -64,12 +63,12 @@ namespace AppFinal
                     Type = selectedObjet,
                     Pilote = selectedPilote,
                     Copilote = selectedCopilote,
-                    Nom = nom
+                    Nom = nom,
                 };
 
                 listeVols.Add(vol);
                 Console.WriteLine($"{vol.Type} décollé : {vol.Nom}");
-                AfficherContenuFichier();
+
                 SerializeData();
             }
         }
@@ -98,58 +97,62 @@ namespace AppFinal
         {
             if (listViewForme.SelectedItem is Vol vol)
             {
+                if (!string.IsNullOrEmpty(vol.NouveauNom))
+                {
+                    vol.Nom = vol.NouveauNom;
+                }
+
                 listeVols.Remove(vol);
                 Console.WriteLine($"{vol.Type} atterri : {vol.Nom}");
-                heuresAtterrissage.AppendLine($"[{DateTime.Now.ToString("HH:mm:ss")}] {vol.Type} atterri : {vol.Nom}");
-                TextBlockHeureAtterrissage.Text = heuresAtterrissage.ToString();
+                heuresAtterrissage.Add($"[{DateTime.Now.ToString("HH:mm:ss")}] {vol.Type} atterri : {vol.Nom}");
+                TextBlockHeureAtterrissage.Text = string.Join(Environment.NewLine, heuresAtterrissage);
+                MessageBox.Show("Aircraft landing.", "Atteri", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                SerializeData();
             }
         }
 
+
         private void SerializeData()
         {
-            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "data.dat");
+            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "data.json");
 
-            using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
+            var data = new DataModel
             {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(fileStream, listeVols);
-            }
+                ListeVols = listeVols,
+                HeuresAtterrissage = heuresAtterrissage
+            };
+
+            string json = JsonConvert.SerializeObject(data, Formatting.Indented);
+
+            File.WriteAllText(filePath, json);
         }
 
         private void DeserializeData()
         {
-            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "data.dat");
+            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "data.json");
 
             if (File.Exists(filePath))
             {
-                using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
-                {
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    listeVols = (ObservableCollection<Vol>)formatter.Deserialize(fileStream);
-                }
+                string json = File.ReadAllText(filePath);
 
-                listViewForme.ItemsSource = listeVols;
-            }
-        }
+                var data = JsonConvert.DeserializeObject<DataModel>(json);
 
-        private void AfficherContenuFichier()
-        {
-            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "data.dat");
-            if (File.Exists(filePath))
-            {
-                byte[] buffer;
-                using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
+                if (data != null)
                 {
-                    buffer = new byte[fileStream.Length];
-                    fileStream.Read(buffer, 0, buffer.Length);
+                    listeVols = data.ListeVols ?? new ObservableCollection<Vol>();
+                    heuresAtterrissage = data.HeuresAtterrissage ?? new ObservableCollection<string>();
                 }
-                string contenu = BitConverter.ToString(buffer).Replace("-", "");
-                TextBlockContenuFichier.Text = contenu;
             }
             else
             {
-                TextBlockContenuFichier.Text = "Le fichier n'existe pas.";
+                listeVols = new ObservableCollection<Vol>();
+                heuresAtterrissage = new ObservableCollection<string>();
+                MessageBox.Show("Le fichier de données n'existe pas.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+
+            listViewForme.ItemsSource = listeVols;
+            TextBlockHeureAtterrissage.Text = string.Join(Environment.NewLine, heuresAtterrissage);
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
@@ -159,12 +162,18 @@ namespace AppFinal
         }
     }
 
-    [Serializable]
     public class Vol
     {
         public string Type { get; set; }
         public string Pilote { get; set; }
         public string Copilote { get; set; }
         public string Nom { get; set; }
+        public string NouveauNom { get; set; }
+    }
+
+    public class DataModel
+    {
+        public ObservableCollection<Vol> ListeVols { get; set; }
+        public ObservableCollection<string> HeuresAtterrissage { get; set; }
     }
 }
