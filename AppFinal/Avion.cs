@@ -8,8 +8,7 @@ namespace AppFinal
         public string Fabricant { get; set; }
         public int CapacitePassagers { get; set; }
         public string NumeroSerie { get; set; }
-        public string? Pilote { get; set; }
-        public string? Copilote { get; set; }
+ 
 
         public Avion(string modele, string fabricant, int capacitePassagers, string numeroSerie)
         {
