@@ -7,16 +7,19 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="500" Width="900">
     <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="C:\Users\W10\Pictures\avion.jpg"/>
+        </Grid.Background>
+
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <GroupBox Grid.Column="0" FontSize="18" Header="Nouveau vol" Margin="20,10,20,20">
             <StackPanel>
                 <TextBlock Margin="10,10,10,0"><Run Text="Type d'"/><Run Language="fr-fr" Text="aéronef"/></TextBlock>
-                <ComboBox x:Name="cbObjet" SelectionChanged="CbObjet_OnSelectionChanged" Height="30" VerticalAlignment="top" Margin="10,10,10,10"
-                          SelectedItem="{Binding SelectedVol.Type, Mode=TwoWay}">
+                <ComboBox x:Name="cbObjet" SelectionChanged="CbObjet_OnSelectionChanged" Height="30" VerticalAlignment="top" Margin="10,10,10,10">
                     <ComboBoxItem>Avion</ComboBoxItem>
                     <ComboBoxItem>Hélicoptère</ComboBoxItem>
                 </ComboBox>
@@ -32,7 +35,7 @@
                 </ComboBox>
 
                 <TextBlock Text="Nom" Margin="10,10,10,0"></TextBlock>
-                <TextBox x:Name="txtBoxNom" Margin="10,5,10,0" Text="{Binding SelectedVol.Nom, Mode=TwoWay}"></TextBox>
+                <TextBox x:Name="txtBoxNom" Margin="10,5,10,0"></TextBox>
 
                 <Button x:Name="btnDecollage" Click="BtnDecollage_OnClick" VerticalAlignment="Bottom" Margin="10,20,10,20">Décollage</Button>
             </StackPanel>
@@ -41,16 +44,13 @@
         <GroupBox Grid.Column="1" FontSize="18" FontWeight="SemiBold" Header="En vol" Margin="20,10,20,20">
             <StackPanel>
                 <ListView x:Name="listViewForme" FontSize="14" FontWeight="Normal" SelectionChanged="ListViewForme_OnSelectionChanged" Margin="10,10,10,10"
-                          ItemsSource="{Binding ListeVols}"
-                          SelectedItem="{Binding SelectedVol}">
+                          ItemsSource="{Binding listeVols}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding Type}" Margin="5"/>
                                 <TextBlock Text=": " Margin="5"/>
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                                    <TextBox Text="{Binding Nom, Mode=TwoWay}" Margin="5"/>
-                                </ScrollViewer>
+                                <TextBox Text="{Binding Nom, Mode=TwoWay}" Margin="5"/>
                                 <Button Content="Atterri" Click="BtnAtteri_OnClick" Margin="5"/>
                             </StackPanel>
                         </DataTemplate>
@@ -60,7 +60,7 @@
                 <Label x:Name="LabelFormInfos" FontSize="14" BorderBrush="#9A9696" BorderThickness="1" Margin="10,10,10,10" Content="Pas de vol en ce moment"/>
 
                 <TextBlock Margin="10,10,10,0"><Run Text="Heure d'atterrissage :"/><LineBreak/><Run/></TextBlock>
-                <TextBlock x:Name="TextBlockHeureAtterrissage" FontSize="14" RenderTransformOrigin="0.5,0.623" Text="{Binding HeuresAtterrissageText}" />
+                <TextBlock x:Name="TextBlockHeureAtterrissage" FontSize="14" RenderTransformOrigin="0.5,0.623" />
                 <TextBlock x:Name="TextBlockContenuFichier" Margin="10,5,10,10" TextWrapping="Wrap"/>
             </StackPanel>
         </GroupBox>
