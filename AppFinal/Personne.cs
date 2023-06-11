@@ -26,33 +26,5 @@ public class Personne
     {
         return $"Nom : {Nom}, Age : {Age}";
     }
-    public class Pilote : Personne
-    {
-        public string NumeroLicence { get; set; }
-
-        public Pilote(string nom, int age, string numeroLicence) : base(nom, age)
-        {
-            NumeroLicence = numeroLicence;
-        }
-
-        public override string ToString()
-        {
-            return $"Nom : {Nom}, Age : {Age}, Numéro de licence : {NumeroLicence}";
-        }
-    }
-
-    public class Copilote : Personne
-    {
-        public string NumeroBadge { get; set; }
-
-        public Copilote(string nom, int age, string numeroBadge) : base(nom, age)
-        {
-            NumeroBadge = numeroBadge;
-        }
-
-        public override string ToString()
-        {
-            return $"Nom : {Nom}, Age : {Age}, Numéro de badge : {NumeroBadge}";
-        }
-    }
 }
+   

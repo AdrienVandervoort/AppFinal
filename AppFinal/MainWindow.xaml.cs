@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 
 namespace AppFinal
@@ -12,6 +13,9 @@ namespace AppFinal
     {
         private ObservableCollection<Vol> listeVols;
         private ObservableCollection<string> heuresAtterrissage;
+        private const string RegistryKeyPath = "Software\\WindowPositionApp";
+        private const string LeftRegistryValue = "Left";
+        private const string TopRegistryValue = "Top";
 
         public MainWindow()
         {
@@ -22,7 +26,17 @@ namespace AppFinal
             listViewForme.ItemsSource = listeVols;
             heuresAtterrissage = new ObservableCollection<string>();
             DeserializeData();
+            RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath);
+            if (key != null)
+            {
+                double left = Convert.ToDouble(key.GetValue(LeftRegistryValue));
+                double top = Convert.ToDouble(key.GetValue(TopRegistryValue));
+
+                Left = left;
+                Top = top;
+            }
         }
+
 
         private void CbObjet_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -157,6 +171,12 @@ namespace AppFinal
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
+            RegistryKey key = Registry.CurrentUser.CreateSubKey(RegistryKeyPath);
+            if (key != null)
+            {
+                key.SetValue(LeftRegistryValue, Left);
+                key.SetValue(TopRegistryValue, Top);
+            }
             SerializeData(); // Sérialiser les données avant de fermer l'application
             base.OnClosing(e);
         }
@@ -176,4 +196,6 @@ namespace AppFinal
         public ObservableCollection<Vol> ListeVols { get; set; }
         public ObservableCollection<string> HeuresAtterrissage { get; set; }
     }
+
+
 }
